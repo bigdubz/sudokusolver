@@ -1,0 +1,3 @@
+C:/Users/sienc/CLionProjects/SudokuSolver/cmake-build-debug/CMakeFiles/SudokuSolver.dir
+C:/Users/sienc/CLionProjects/SudokuSolver/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/sienc/CLionProjects/SudokuSolver/cmake-build-debug/CMakeFiles/rebuild_cache.dir
