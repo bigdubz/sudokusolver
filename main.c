@@ -1,6 +1,7 @@
 #include <stdio.h>
 
-void bruteForce(char board[9][9], int, const int*);
+
+void bruteForce(char board[9][9], int);
 
 int notIn(const int size, const char arr[], const char num) {
     for (int i = 0; i < size; i++) {
@@ -71,17 +72,9 @@ char solveNumber(char board[9][9], const int i, const int j, const int use_recur
     char used_nums[9];
     const int size = fillUsedNums(board, i, j, used_nums);
 
-    // stage 1: check the sum
-    if (size == 8) {
-        int sum = 0;
-        for (int n = 0; n < size; n++) {
-            sum += used_nums[n] - '0';
-        }
-        return 45 - sum + '0';
-    }
     if (size == 9) return board[i][j];
 
-    // stage 2: check 'last remaining cell'
+    // stage 1: check 'last remaining cell'
     char unused_nums[9-size];
     fillMissingNums(size, used_nums, unused_nums);
     const int boxRow = i/3;
@@ -140,20 +133,21 @@ char solveNumber(char board[9][9], const int i, const int j, const int use_recur
         }
     }
 
-    // stage 3: brute force this bitch
+    // stage 2: brute force this bitch
     if (use_recursion) {
-        char board_test[9][9];
+        char brute_force_board[9][9];
+
         for (int y = 0; y < 9; y++) {
             for (int x = 0; x < 9; x++) {
-                board_test[y][x] = board[y][x];
+                brute_force_board[y][x] = board[y][x];
             }
         }
-        const int s = 9;
+
         for (int y = 0; y < 9 - size; y++) {
             const char number_brute_forcing = unused_nums[y];
-            board_test[i][j] = number_brute_forcing;
-            bruteForce(board_test, 9, &s);
-            if (checkSolved(board_test)) {
+            brute_force_board[i][j] = number_brute_forcing;
+            bruteForce(brute_force_board, 9);
+            if (checkSolved(brute_force_board)) {
                 return number_brute_forcing;
             }
         }
@@ -161,10 +155,10 @@ char solveNumber(char board[9][9], const int i, const int j, const int use_recur
     return '.';
 }
 
-void bruteForce(char board[9][9], const int boardSize, const int* boardColSize) {
+void bruteForce(char board[9][9], const int boardSize) {
     for (int iter = 0; iter < 100; iter++) {
         for (int i = 0; i < boardSize; i++) {
-            for (int j = 0; j < *boardColSize; j++) {
+            for (int j = 0; j < boardSize; j++) {
                 if (board[i][j] == '.') {
                     board[i][j] = solveNumber(board, i, j, 0);
                 }
@@ -179,16 +173,23 @@ void solveSudoku(char board[9][9], const int boardSize, const int* boardColSize)
     int d_count_compare = 0;
     for (int iter = 0; iter < 100; iter++) {
         int d_count = 0;
+        int skip_iter = 0;
         for (int i = 0; i < boardSize; i++) {
+            if (skip_iter) break;
             for (int j = 0; j < *boardColSize; j++) {
+                if (skip_iter) break;
                 if (board[i][j] == '.') {
                     const char c = solveNumber(board, i, j, on_recursion);
                     board[i][j] = c;
                     if (c == '.')
                         d_count++;
+                    else {
+                        skip_iter = 1;
+                    }
                 }
             }
         }
+        if (skip_iter) continue;
         on_recursion = 0;
         if (d_count_compare == d_count && d_count != 0) {
             on_recursion = 1;
@@ -205,17 +206,17 @@ void solveSudoku(char board[9][9], const int boardSize, const int* boardColSize)
 int main(void) {
     const int s = 9;
     char a[9][9] = {
-            {'8','6','.',    '.','.','3',    '.','.','.'},
-            {'.','.','.',    '5','.','9',    '1','.','2'},
-            {'.','.','.',    '.','4','.',    '.','.','.'},
+            {'.','.','6',    '7','1','.',    '.','3','.'},
+            {'.','.','.',    '.','.','.',    '.','.','.'},
+            {'8','7','5',    '3','.','.',    '.','.','2'},
 
-            {'2','.','6',    '.','.','.',    '3','.','5'},
-            {'.','.','.',    '.','.','.',    '7','.','.'},
-            {'.','4','.',    '.','.','.',    '.','.','1'},
+            {'.','2','8',    '.','.','.',    '.','.','7'},
+            {'.','.','.',    '4','.','5',    '.','.','.'},
+            {'1','.','.',    '.','.','.',    '9','5','.'},
 
-            {'4','3','2',    '.','.','.',    '.','.','7'},
-            {'.','1','.',    '6','.','8',    '.','.','.'},
-            {'.','.','.',    '.','.','2',    '.','.','.'}
+            {'6','.','.',    '.','.','9',    '2','1','4'},
+            {'.','.','.',    '.','.','.',    '.','.','.'},
+            {'.','3','.',    '.','4','6',    '5','.','.'}
     };
     solveSudoku(a, s, &s);
     for (int i = 0; i < s; i++) {
